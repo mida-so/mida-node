@@ -1,0 +1,29 @@
+{
+    "name": "mida-node",
+    "version": "1.0.0",
+    "description": "Mida Node.js integration",
+    "license": "MIT",
+    "repository": "mida/mida-node",
+    "author": {
+        "name": "mida",
+        "email": "hello@mida.so",
+        "url": "https://www.mida.so"
+    },
+    "engines": {
+        "node": ">=4"
+    },
+    "files": [
+        "index.js"
+    ],
+    "keywords": [
+        "mida",
+        "experiment",
+        "split testing",
+        "ab testing"
+    ],
+    "dependencies": {
+        "axios": "0.24.0"
+    },
+    "devDependencies": {
+    }
+}
