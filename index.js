@@ -8,21 +8,22 @@ class Mida {
   constructor(publicKey, options) {
     options = options || {}
 
-    assert(publicKey, "You must pass your Mida project's api key.")
+    assert(publicKey, "You must pass your Mida project key")
 
     this.publicKey = publicKey
     this.host = 'https://api.mida.so'
+    this.user_id = null
   }
 
   getExperiment(experimentId, distinctId) {
-    assert(experimentId, "You must pass your Mida experiment ID.")
-    assert(distinctId, "You must pass your user distinct ID.")
+    assert(experimentId, "You must pass your Mida experiment ID")
+    assert(distinctId || this.user_id, "You must pass your user distinct ID")
 
     return new Promise((resolve, reject) => {
       const data = {
         key: this.publicKey,
         test_id: experimentId,
-        unique_id: distinctId
+        distinct_id: distinctId || this.user_id
       }
   
       const headers = {}
@@ -51,6 +52,42 @@ class Mida {
       })
     })
   }
+
+  setEvent(eventName, distinctId) {
+    assert(eventName, "You need to set an event name")
+    assert(distinctId || this.user_id, "You must pass your user distinct ID")
+
+    return new Promise((resolve, reject) => {
+      const data = {
+        key: this.publicKey,
+        name: eventName,
+        distinct_id: distinctId || this.user_id
+      }
+  
+      const headers = {}
+      if (typeof window === 'undefined') {
+        headers['user-agent'] = `mida-node/${version}`
+      }
+  
+      const req = {
+        method: 'POST',
+        url: `${this.host}/experiment/event`,
+        data,
+        headers
+      }
+
+      axios(req)
+      .then(() => {
+        resolve()
+      })
+      .catch((err) => {
+        if (err.response) {
+          const error = new Error(err.response.statusText)
+          reject(error)
+        }
+      })
+    })
+  }    
 }
 
 module.exports = Mida
