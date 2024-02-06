@@ -15,14 +15,14 @@ class Mida {
     this.user_id = null
   }
 
-  getExperiment(experimentId, distinctId) {
-    assert(experimentId, "You must pass your Mida experiment ID")
+  getExperiment(experimentKey, distinctId) {
+    assert(experimentKey, "You must pass your Mida experiment key")
     assert(distinctId || this.user_id, "You must pass your user distinct ID")
 
     return new Promise((resolve, reject) => {
       const data = {
         key: this.publicKey,
-        test_id: experimentId,
+        experiment_key: experimentKey,
         distinct_id: distinctId || this.user_id
       }
   
