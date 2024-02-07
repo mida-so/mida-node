@@ -87,7 +87,8 @@ class Mida {
         }
       })
     })
-  }    
+  }
+
 }
 
 module.exports = Mida
