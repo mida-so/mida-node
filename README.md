@@ -39,13 +39,21 @@ const mida = new Mida('YOUR_PROJECT_KEY');
 const experimentKey = 'EXPERIMENT_KEY';
 const distinctId = 'USER_DISTINCT_ID';
 
-mida.getExperiment(experimentKey, distinctId)
-  .then(version => {
-    // Handle the experiment version here
-  })
-  .catch(error => {
-    // Handle the error here
-  });
+const version = await mida.getExperiment(experimentKey, distinctId);
+
+if (version === 'Control') {
+    // Handle Control logic
+}
+
+if (version === 'Variant 1') {
+    // Handle Variant 1 logic
+}
+
+// Depending on how many variants you have created
+if (version === 'Variant 2') {
+    // Handle Variant 2 logic
+}
+
 ```
 
 4. Use the `setEvent` method to log an event for a user. You need to provide the event name and the distinct ID of the user:
@@ -54,20 +62,14 @@ mida.getExperiment(experimentKey, distinctId)
 const eventName = 'EVENT_NAME';
 const distinctId = 'USER_DISTINCT_ID';
 
-mida.setEvent(eventName, distinctId)
-  .then(() => {
-    // Event logged successfully
-  })
-  .catch(error => {
-    // Handle the error here
-  });
+await mida.setEvent(eventName, distinctId)
 ```
 
 ## API Reference
 
-### `Mida(publicKey, options)`
+### `Mida(projectKey, options)`
 
-- `publicKey`: (required) Your Mida project key.
+- `projectKey`: (required) Your Mida project key.
 - `options`: (optional) An object of additional options.
 
 ### `getExperiment(experimentKey, distinctId)`
