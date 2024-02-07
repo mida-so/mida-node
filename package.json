@@ -1,11 +1,11 @@
 {
     "name": "mida-node",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Mida Node.js integration",
     "license": "MIT",
-    "repository": "mida/mida-node",
+    "repository": "mida-so/mida-node",
     "author": {
-        "name": "mida",
+        "name": "Mida.so",
         "email": "hello@mida.so",
         "url": "https://www.mida.so"
     },
