@@ -16,15 +16,14 @@ class Mida {
   }
 
   // A/B Testing methods
-  getExperiment(experimentKey, distinctId, properties = {}) {
+  getExperiment(experimentKey, distinctId) {
     assert(experimentKey, "You must pass your Mida experiment key")
     assert(distinctId || this.user_id, "You must pass your user distinct ID")
     return new Promise((resolve, reject) => {
       const data = {
         key: this.publicKey,
         experiment_key: experimentKey,
-        distinct_id: distinctId || this.user_id,
-        properties: properties
+        distinct_id: distinctId || this.user_id
       }
 
       const headers = {}
@@ -87,6 +86,38 @@ class Mida {
     })
   }
 
+  setAttribute(distinctId, properties = {}) {
+    assert(distinctId || this.user_id, "You must pass your user distinct ID")
+    assert(properties, "You must pass your user properties")
+    return new Promise((resolve, reject) => {
+      let data = properties
+
+      data.id = distinctId || this.user_id
+
+      const headers = {}
+      if (typeof window === 'undefined') {
+        headers['user-agent'] = `mida-node/${version}`
+      }
+
+      const req = {
+        method: 'POST',
+        url: `${this.host}/track/${this.publicKey}`,
+        data,
+        headers
+      }
+      axios(req)
+        .then(() => {
+          resolve()
+        })
+        .catch((err) => {
+          if (err.response) {
+            const error = new Error(err.response.statusText)
+            reject(error)
+          }
+        })
+    })
+  }
+
   cachedFeatureFlag() {
     const cacheKey = `${this.publicKey}:${this.user_id}`
     const cachedFeatures = this.featureFlagCache.get(cacheKey)
@@ -101,11 +132,11 @@ class Mida {
     })
   }
 
-  onFeatureFlags(properties = {}) {
+  onFeatureFlags(distinctId = null) {
     return new Promise(async (resolve, reject) => {
       const cachedItems = this.cachedFeatureFlag().length
       try {
-        await this.reloadFeatureFlags(properties)
+        await this.reloadFeatureFlags(distinctId)
         if (!cachedItems) resolve()
       } catch (e) {
         reject(e)
@@ -114,11 +145,11 @@ class Mida {
     })
   }
 
-  reloadFeatureFlags(properties = {}) {
+  reloadFeatureFlags(distinctId = null) {
     return new Promise((resolve, reject) => {
       const data = {
         key: this.publicKey,
-        properties: properties
+        user_id: distinctId
       }
 
       const headers = {}
@@ -128,7 +159,7 @@ class Mida {
 
       const req = {
         method: 'POST',
-        url: `${this.host}/feature-flag/query`,
+        url: `${this.host}/feature-flag`,
         data,
         headers
       }
