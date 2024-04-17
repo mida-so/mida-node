@@ -55,18 +55,18 @@ await mida.setAttribute(distinctId, attributes);
 ### Feature Flags
 6. Use the `isFeatureEnabled` method to check if a feature flag is enabled for the current user:
 ```javascript
+const distinctId = 'USER_DISTINCT_ID';
 const featureFlagKey = 'FEATURE_FLAG_KEY';
+
+// Use the `onFeatureFlags` method to reload the feature flags for the current user:
+await mida.onFeatureFlags(distinctId);
+
 const isEnabled = await mida.isFeatureEnabled(featureFlagKey);
 if (isEnabled) {
 // Feature flag is enabled, perform corresponding actions
-} else {
-// Feature flag is disabled, perform alternative actions
 }
 ```
-7. Use the `onFeatureFlags` method to reload the feature flags for the current user:
-```javascript
-await mida.onFeatureFlags();
-```
+
 ## API Reference
 ### `Mida(projectKey, options)`
 - `projectKey`: (required) Your Mida project key.
