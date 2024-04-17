@@ -42,8 +42,18 @@ const eventName = 'EVENT_NAME';
 const distinctId = 'USER_DISTINCT_ID';
 await mida.setEvent(eventName, distinctId)
 ```
+### User Attributes
+5. Use the `setAttribute` method to set user attributes for a specific user. You need to provide the distinct ID of the user and an object containing the attribute key-value pairs:
+```javascript
+const distinctId = 'USER_DISTINCT_ID';
+const attributes = {
+gender: 'male',
+company_name: 'Apple Inc'
+};
+await mida.setAttribute(distinctId, attributes);
+```
 ### Feature Flags
-5. Use the `isFeatureEnabled` method to check if a feature flag is enabled for the current user:
+6. Use the `isFeatureEnabled` method to check if a feature flag is enabled for the current user:
 ```javascript
 const featureFlagKey = 'FEATURE_FLAG_KEY';
 const isEnabled = await mida.isFeatureEnabled(featureFlagKey);
@@ -53,7 +63,7 @@ if (isEnabled) {
 // Feature flag is disabled, perform alternative actions
 }
 ```
-6. Use the `onFeatureFlags` method to reload the feature flags for the current user:
+7. Use the `onFeatureFlags` method to reload the feature flags for the current user:
 ```javascript
 await mida.onFeatureFlags();
 ```
@@ -69,11 +79,15 @@ Returns a Promise that resolves to the version of the experiment.
 - `eventName`: (required) The name of the event you want to log.
 - `distinctId`: (required) The distinct ID of the user.
 Returns a Promise that resolves when the event is successfully logged.
+### `setAttribute(distinctId, properties)`
+- `distinctId`: (required) The distinct ID of the user.
+- `properties`: (required) An object containing the attribute key-value pairs.
+Returns a Promise that resolves when the attributes are successfully set.
 ### `isFeatureEnabled(key)`
 - `key`: (required) The key of the feature flag you want to check.
 Returns a Promise that resolves to a boolean indicating whether the feature flag is enabled or not.
-### `onFeatureFlags(properties)`
-- `properties`: (optional) An object of additional properties to pass to the feature flag query.
+### `onFeatureFlags(distinctId)`
+- `distinctId`: (optional) The distinct ID of the user.
 Returns a Promise that resolves when the feature flags are successfully reloaded.
 ## Contributing
 Contributions are welcome! If you find any issues or have suggestions for improvement, please create a pull request.
