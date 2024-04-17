@@ -16,14 +16,15 @@ class Mida {
   }
 
   // A/B Testing methods
-  getExperiment(experimentKey, distinctId) {
+  getExperiment(experimentKey, distinctId, properties = {}) {
     assert(experimentKey, "You must pass your Mida experiment key")
     assert(distinctId || this.user_id, "You must pass your user distinct ID")
     return new Promise((resolve, reject) => {
       const data = {
         key: this.publicKey,
         experiment_key: experimentKey,
-        distinct_id: distinctId || this.user_id
+        distinct_id: distinctId || this.user_id,
+        properties: properties
       }
 
       const headers = {}
@@ -86,53 +87,38 @@ class Mida {
     })
   }
 
-  // Feature Flag methods
-  async saveCachedFeaturesToDatabase(features) {
+  cachedFeatureFlag() {
     const cacheKey = `${this.publicKey}:${this.user_id}`
-    this.featureFlagCache.set(cacheKey, features)
-
-    // If the cache size exceeds the maximum limit, remove the oldest entry
-    if (this.featureFlagCache.size > this.maxCacheSize) {
-      const oldestKey = this.featureFlagCache.keys().next().value
-      this.featureFlagCache.delete(oldestKey)
-    }
-  }
-
-  async getCachedFeaturesFromDatabase() {
-    const cacheKey = `${this.publicKey}:${this.user_id}`
-    return this.featureFlagCache.get(cacheKey)
-  }
-
-  async cachedFeatureFlag() {
-    // Retrieve cached features from a database or file system
-    const cachedFeatures = await getCachedFeaturesFromDatabase()
-    if (cachedFeatures) {
-      this.enabled_features = JSON.parse(cachedFeatures)
-      return this.enabled_features
-    }
+    const cachedFeatures = this.featureFlagCache.get(cacheKey)
+    if (cachedFeatures) return cachedFeatures
     return []
   }
 
-  async isFeatureEnabled(key) {
-    this.enabled_features = await this.cachedFeatureFlag()
-    return this.enabled_features.includes(key)
+  isFeatureEnabled(key) {
+    return new Promise((resolve) => {
+      this.enabled_features = this.cachedFeatureFlag()
+      resolve(this.enabled_features.includes(key))
+    })
   }
 
-  async onFeatureFlags(callback) {
-    const cachedItems = (await this.cachedFeatureFlag()).length
-    try {
-      await this.reloadFeatureFlags()
-      if (!cachedItems) callback()
-    } catch (e) {
-      console.error(e)
-    }
-    if (cachedItems) callback()
+  onFeatureFlags(properties = {}) {
+    return new Promise(async (resolve, reject) => {
+      const cachedItems = this.cachedFeatureFlag().length
+      try {
+        await this.reloadFeatureFlags(properties)
+        if (!cachedItems) resolve()
+      } catch (e) {
+        reject(e)
+      }
+      if (cachedItems) resolve()
+    })
   }
 
-  async reloadFeatureFlags() {
+  reloadFeatureFlags(properties = {}) {
     return new Promise((resolve, reject) => {
       const data = {
-        key: this.publicKey
+        key: this.publicKey,
+        properties: properties
       }
 
       const headers = {}
@@ -147,10 +133,15 @@ class Mida {
         headers
       }
       axios(req)
-        .then(async result => {
+        .then(result => {
           this.enabled_features = result.data
-          // Save enabled features to a database or file system
-          await saveCachedFeaturesToDatabase(JSON.stringify(this.enabled_features))
+          const cacheKey = `${this.publicKey}:${this.user_id}`
+          this.featureFlagCache.set(cacheKey, result.data)
+      
+          if (this.featureFlagCache.size > this.maxCacheSize) {
+            const oldestKey = this.featureFlagCache.keys().next().value
+            this.featureFlagCache.delete(oldestKey)
+          }
           resolve()
         })
         .catch((err) => {
