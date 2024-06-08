@@ -52,39 +52,41 @@ class Mida {
     })
   }
 
-  setEvent(eventName, distinctId) {
-    assert(eventName, "You need to set an event name")
-    assert(distinctId || this.user_id, "You must pass your user distinct ID")
+  setEvent(eventName, distinctId, properties = {}) {
+    assert(eventName, "You need to set an event name");
+    assert(distinctId || this.user_id, "You must pass your user distinct ID");
     return new Promise((resolve, reject) => {
       const data = {
         key: this.publicKey,
         name: eventName,
-        distinct_id: distinctId || this.user_id
-      }
-
-      const headers = {}
+        distinct_id: distinctId || this.user_id,
+        properties: JSON.stringify(properties)
+      };
+  
+      const headers = {};
       if (typeof window === 'undefined') {
-        headers['user-agent'] = `mida-node/${version}`
+        headers['user-agent'] = `mida-node/${version}`;
       }
-
+  
       const req = {
         method: 'POST',
         url: `${this.host}/experiment/event`,
         data,
         headers
-      }
+      };
       axios(req)
         .then(() => {
-          resolve()
+          resolve();
         })
         .catch((err) => {
           if (err.response) {
-            const error = new Error(err.response.statusText)
-            reject(error)
+            const error = new Error(err.response.statusText);
+            reject(error);
           }
-        })
-    })
+        });
+    });
   }
+
 
   setAttribute(distinctId, properties = {}) {
     assert(distinctId || this.user_id, "You must pass your user distinct ID")
