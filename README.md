@@ -42,31 +42,6 @@ const eventName = 'EVENT_NAME';
 const distinctId = 'USER_DISTINCT_ID';
 await mida.setEvent(eventName, distinctId);
 ```
-### User Attributes
-5. Use the `setAttribute` method to set user attributes for a specific user. You need to provide the distinct ID of the user and an object containing the attribute key-value pairs:
-```javascript
-const distinctId = 'USER_DISTINCT_ID';
-const attributes = {
-gender: 'male',
-company_name: 'Apple Inc'
-};
-await mida.setAttribute(distinctId, attributes);
-```
-### Feature Flags
-6. Use the `isFeatureEnabled` method to check if a feature flag is enabled for the current user:
-```javascript
-const distinctId = 'USER_DISTINCT_ID';
-const featureFlagKey = 'FEATURE_FLAG_KEY';
-
-// Use the `onFeatureFlags` method to reload the feature flags for the current user:
-await mida.onFeatureFlags(distinctId);
-
-const isEnabled = await mida.isFeatureEnabled(featureFlagKey);
-if (isEnabled) {
-// Feature flag is enabled, perform corresponding actions
-}
-```
-
 For revenue tracking, you can use the `setEvent` method with the event name as 'Purchase' and include additional attributes such as revenue, quantity, and currency. Here's an example:
 
 ```javascript
