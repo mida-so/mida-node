@@ -1,6 +1,6 @@
 {
     "name": "mida-node",
-    "version": "1.0.3",
+    "version": "1.0.5",
     "description": "Mida Node.js integration",
     "license": "MIT",
     "repository": "mida-so/mida-node",
