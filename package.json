@@ -22,7 +22,7 @@
         "ab testing"
     ],
     "dependencies": {
-        "axios": "0.28.0"
+        "axios": "0.30.2"
     },
     "devDependencies": {
     }
