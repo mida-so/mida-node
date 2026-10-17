@@ -25,5 +25,8 @@
         "axios": "0.30.2"
     },
     "devDependencies": {
+    },
+    "scripts": {
+        "test": "node --test"
     }
 }

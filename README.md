@@ -83,9 +83,19 @@ if (isEnabled) {
 // Feature flag is disabled, perform alternative actions
 }
 ```
-7. Use the `onFeatureFlags` method to reload the feature flags for the current user:
+7. Use the `onFeatureFlags` method to load the feature flags for a user (and cache them):
 ```javascript
-await mida.onFeatureFlags();
+await mida.onFeatureFlags('USER_DISTINCT_ID');
+```
+8. Use the `reloadFeatureFlags` method to force a refresh of a user's feature flags from the Mida API and update the cache:
+```javascript
+await mida.reloadFeatureFlags('USER_DISTINCT_ID');
+```
+
+Feature flags are cached per user. Pass the same distinct ID to `isFeatureEnabled` to read that user's flags:
+```javascript
+await mida.onFeatureFlags('USER_DISTINCT_ID');
+const isEnabled = await mida.isFeatureEnabled('FEATURE_FLAG_KEY', 'USER_DISTINCT_ID');
 ```
 ## API Reference
 ### `Mida(projectKey, options)`
@@ -95,20 +105,25 @@ await mida.onFeatureFlags();
 - `experimentKey`: (required) The key of the experiment you want to get the version of.
 - `distinctId`: (required) The distinct ID of the user.
 Returns a Promise that resolves to the version of the experiment.
-### `setEvent(eventName, distinctId)`
+### `setEvent(eventName, distinctId, properties)`
 - `eventName`: (required) The name of the event you want to log.
 - `distinctId`: (required) The distinct ID of the user.
+- `properties`: (optional) An object of additional event attributes.
 Returns a Promise that resolves when the event is successfully logged.
 ### `setAttribute(distinctId, properties)`
 - `distinctId`: (required) The distinct ID of the user.
 - `properties`: (required) An object containing the attribute key-value pairs.
 Returns a Promise that resolves when the attributes are successfully set.
-### `isFeatureEnabled(key)`
+### `isFeatureEnabled(key, distinctId)`
 - `key`: (required) The key of the feature flag you want to check.
+- `distinctId`: (optional) The distinct ID of the user whose cached flags should be checked. Flags must have been loaded for that user with `onFeatureFlags` or `reloadFeatureFlags`.
 Returns a Promise that resolves to a boolean indicating whether the feature flag is enabled or not.
 ### `onFeatureFlags(distinctId)`
 - `distinctId`: (optional) The distinct ID of the user.
-Returns a Promise that resolves when the feature flags are successfully reloaded.
+Returns a Promise that resolves when the feature flags are successfully loaded, or rejects on HTTP or network errors.
+### `reloadFeatureFlags(distinctId)`
+- `distinctId`: (optional) The distinct ID of the user.
+Fetches the user's feature flags from the Mida API and refreshes the cache. Returns a Promise that resolves when done, or rejects on HTTP or network errors.
 ## Contributing
 Contributions are welcome! If you find any issues or have suggestions for improvement, please create a pull request.
 ## License
