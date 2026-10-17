@@ -3,6 +3,13 @@ const assert = require('assert')
 const axios = require('axios')
 const version = require('./package.json').version
 
+// Always settle the promise: HTTP errors keep their status text as the message,
+// network errors (timeouts, DNS, connection reset...) are passed through.
+function toError(err) {
+  if (err && err.response) return new Error(err.response.statusText)
+  return err instanceof Error ? err : new Error(String(err))
+}
+
 class Mida {
   constructor(publicKey, options) {
     options = options || {}
@@ -43,12 +50,7 @@ class Mida {
           if (json.version) resolve(json.version)
           else resolve(null)
         })
-        .catch((err) => {
-          if (err.response) {
-            const error = new Error(err.response.statusText)
-            reject(error)
-          }
-        })
+        .catch((err) => reject(toError(err)))
     })
   }
 
@@ -78,12 +80,7 @@ class Mida {
         .then(() => {
           resolve();
         })
-        .catch((err) => {
-          if (err.response) {
-            const error = new Error(err.response.statusText);
-            reject(error);
-          }
-        });
+        .catch((err) => reject(toError(err)));
     });
   }
 
@@ -110,47 +107,38 @@ class Mida {
         .then(() => {
           resolve()
         })
-        .catch((err) => {
-          if (err.response) {
-            const error = new Error(err.response.statusText)
-            reject(error)
-          }
-        })
+        .catch((err) => reject(toError(err)))
     })
   }
 
-  cachedFeatureFlag() {
-    const cacheKey = `${this.publicKey}:${this.user_id}`
+  // Flags are cached per user so one user's flags are never served to another.
+  featureFlagCacheKey(distinctId) {
+    return `${this.publicKey}:${distinctId || this.user_id}`
+  }
+
+  cachedFeatureFlag(distinctId = null) {
+    const cacheKey = this.featureFlagCacheKey(distinctId)
     const cachedFeatures = this.featureFlagCache.get(cacheKey)
     if (cachedFeatures) return cachedFeatures
     return []
   }
 
-  isFeatureEnabled(key) {
+  isFeatureEnabled(key, distinctId = null) {
     return new Promise((resolve) => {
-      this.enabled_features = this.cachedFeatureFlag()
+      this.enabled_features = this.cachedFeatureFlag(distinctId)
       resolve(this.enabled_features.includes(key))
     })
   }
 
   onFeatureFlags(distinctId = null) {
-    return new Promise(async (resolve, reject) => {
-      const cachedItems = this.cachedFeatureFlag().length
-      try {
-        await this.reloadFeatureFlags(distinctId)
-        if (!cachedItems) resolve()
-      } catch (e) {
-        reject(e)
-      }
-      if (cachedItems) resolve()
-    })
+    return this.reloadFeatureFlags(distinctId)
   }
 
   reloadFeatureFlags(distinctId = null) {
     return new Promise((resolve, reject) => {
       const data = {
         key: this.publicKey,
-        user_id: distinctId
+        user_id: distinctId || this.user_id
       }
 
       const headers = {}
@@ -167,7 +155,7 @@ class Mida {
       axios(req)
         .then(result => {
           this.enabled_features = result.data
-          const cacheKey = `${this.publicKey}:${this.user_id}`
+          const cacheKey = this.featureFlagCacheKey(distinctId)
           this.featureFlagCache.set(cacheKey, result.data)
       
           if (this.featureFlagCache.size > this.maxCacheSize) {
@@ -176,12 +164,7 @@ class Mida {
           }
           resolve()
         })
-        .catch((err) => {
-          if (err.response) {
-            const error = new Error(err.response.statusText)
-            reject(error)
-          }
-        })
+        .catch((err) => reject(toError(err)))
     })
   }
 }
