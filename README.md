@@ -8,6 +8,37 @@ Server-side A/B testing and feature flags for Node.js, for use with [Mida](https
 npm install mida-node
 ```
 
+## Set up from the command line
+
+No Mida account yet? The package includes a small CLI that creates one and saves the keys, for
+you or for a coding agent working in your project.
+
+```bash
+npx mida-node init --email you@example.com --accept-terms
+```
+
+Mida emails you a 6-digit code. Enter it when asked, and the CLI writes `MIDA_API_KEY`,
+`MIDA_PROJECT_KEY` and `MIDA_REGION` to `.env` (and adds `.env` to `.gitignore`). The API key is
+never printed. `--accept-terms` accepts the [Mida terms](https://www.mida.so/terms). Add
+`--region eu` for an EU account; an account cannot change region later.
+
+An agent that cannot answer a prompt runs the two steps separately:
+
+```bash
+npx mida-node register --email you@example.com --accept-terms
+npx mida-node claim --code 123456
+```
+
+| Command | What it does |
+|---|---|
+| `mida snippet` | Prints the install tag for the project (client-side testing) |
+| `mida doctor [--wait]` | Checks that the tag is sending visitors. `--wait` polls for up to 10 minutes |
+| `mida check <test_id>` | Runs Mida's setup rules over a saved experiment before you launch it |
+
+Add `--json` for machine-readable output. Exit code 2 means the check ran and found a problem.
+If you already have an account, create an API key in the dashboard (Settings, API) and set the
+three variables yourself.
+
 ## Quick start
 
 Create one client when your application starts and share it.

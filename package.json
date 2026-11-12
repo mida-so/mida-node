@@ -1,6 +1,6 @@
 {
     "name": "mida-node",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "description": "Mida Node.js integration",
     "license": "MIT",
     "repository": "mida-so/mida-node",
@@ -12,8 +12,12 @@
     "engines": {
         "node": ">=12"
     },
+    "bin": {
+        "mida": "bin/mida.js"
+    },
     "files": [
         "index.js",
+        "bin",
         "README.md",
         "LICENSE"
     ],
@@ -29,6 +33,6 @@
     "devDependencies": {},
     "main": "index.js",
     "scripts": {
-        "test": "node --test test/mida.test.js"
+        "test": "node --test test/mida.test.js test/cli.test.js"
     }
 }
